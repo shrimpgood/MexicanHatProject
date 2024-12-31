@@ -32,8 +32,9 @@
 
         const fragmentShaderSource = `
         precision mediump float;
+        uniform vec4 u_Color;
         void main() {
-            gl_FragColor = vec4(1.0, 0.5, 0.0, 1.0); // 橘色
+            gl_FragColor = u_Color;
         }`;
 
         // 創建著色器與程式
@@ -74,6 +75,7 @@
         gl.enableVertexAttribArray(a_Position);
 
         const u_ModelMatrix = gl.getUniformLocation(program, 'u_ModelMatrix');
+        const u_Color = gl.getUniformLocation(program, 'u_Color'); // 顏色變量
 
         // 動畫參數
         let earthAngle = 0;
@@ -97,13 +99,21 @@
             const modelMatrix = mat4.create(); // 創建矩陣
             mat4.identity(modelMatrix); // 初始化為單位矩陣
 
+            // 繪製太陽
+            gl.uniform4fv(u_Color, [1.0, 0.5, 0.0, 1.0]); // 橙色
+            mat4.identity(modelMatrix);
+            gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix);
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
+
             // 繪製地球
+            gl.uniform4fv(u_Color, [0.0, 0.0, 1.0, 1.0]); // 藍色
             mat4.rotateZ(modelMatrix, modelMatrix, glMatrix.toRadian(earthAngle));
             gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix);
             gl.drawArrays(gl.TRIANGLES, 0, 3);
 
             // 繪製月球（相對於地球）
             mat4.translate(modelMatrix, modelMatrix, [0.75, 0, 0]);
+            gl.uniform4fv(u_Color, [0.5, 0.5, 0.5, 1.0]); // 灰色
             mat4.rotateZ(modelMatrix, modelMatrix, glMatrix.toRadian(moonAngle));
             gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix);
             gl.drawArrays(gl.TRIANGLES, 0, 3);
